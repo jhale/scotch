@@ -378,8 +378,11 @@ FileCompress * const        compptr)
   encodat.avail_out = FILECOMPRESSDATASIZE;
   do {
     if ((encodat.avail_in == 0) && (enacval == LZMA_RUN)) {
+#ifdef _MSC_VER
+      int                 bytenbr; //According to MSDN _read only returns int
+#else
       ssize_t             bytenbr;
-
+#endif
       bytenbr = read (compptr->infdnum, compptr->bufftab, FILECOMPRESSDATASIZE); /* Read from pipe */
       if (bytenbr < 0) {
         errorPrint ("fileCompressLzma: cannot read");

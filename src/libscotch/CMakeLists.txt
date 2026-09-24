@@ -573,9 +573,13 @@ if(LIBLZMA_FOUND)
 endif()
 
 # Add thread library
-if(Threads_FOUND)
-  target_compile_definitions(scotch PRIVATE COMMON_PTHREAD SCOTCH_PTHREAD)
-  target_link_libraries(scotch PRIVATE Threads::Threads ${THREADS_PTHREADS_WIN32_LIBRARY})
+if(USE_PTHREAD)
+  target_compile_definitions(scotch PUBLIC COMMON_PTHREAD SCOTCH_PTHREAD)
+  if(NOT WIN32)
+    target_link_libraries(scotch PUBLIC Threads::Threads)
+  else()
+    target_link_libraries(scotch PUBLIC PThreads4W::PThreads4W)
+  endif()
 endif()
 
 # Include files
@@ -599,6 +603,10 @@ target_include_directories(scotcherr PUBLIC
   $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 
 add_dependencies(scotcherr scotch_h)
+
+if(NOT "${LIBSCOTCHERR}" STREQUAL "")
+  add_dependencies(scotch ${LIBSCOTCHERR})
+endif()
 
 add_library(scotcherrexit library_error_exit.c)
 add_library(SCOTCH::scotcherrexit ALIAS scotcherrexit)
@@ -831,7 +839,15 @@ set(PTSCOTCH_C_SOURCES
   vdgraph_store.c)
 
 if(BUILD_PTSCOTCH)
+  # ptscotch privately compiles its own copy of ${SCOTCH_C_SOURCES} rather
+  # than only linking against the scotch target. A handful of internal
+  # StratTab/Strat globals (e.g. stratdummy) are referenced directly (not
+  # just via function calls) across that boundary, and on Windows
+  # CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS cannot export data symbols for
+  # cross-DLL use. Compiling everything into ptscotch itself avoids the
+  # need for any such cross-DLL data reference.
   add_library(ptscotch
+    ${SCOTCH_C_SOURCES}
     ${PTSCOTCH_C_SOURCES})
   add_library(SCOTCH::ptscotch ALIAS ptscotch)
 
@@ -848,15 +864,39 @@ if(BUILD_PTSCOTCH)
     $<BUILD_INTERFACE:${GENERATED_INCLUDE_DIR}>
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 
-  add_dependencies(ptscotch ptscotch_h scotch_h)
+  add_dependencies(ptscotch ptscotch_h scotch_h parser_yy_c parser_ll_c)
+
+  # Mirror the (de)compression library setup applied to scotch above,
+  # since ptscotch now compiles its own copy of the same sources.
+  if(ZLIB_FOUND)
+    target_compile_definitions(ptscotch PRIVATE COMMON_FILE_COMPRESS_GZ)
+    target_include_directories(ptscotch PRIVATE ${ZLIB_INCLUDE_DIRS})
+    target_link_libraries(ptscotch PRIVATE ${ZLIB_LIBRARIES})
+  endif()
+
+  if(BZIP2_FOUND)
+    target_compile_definitions(ptscotch PRIVATE COMMON_FILE_COMPRESS_BZ2)
+    target_include_directories(ptscotch PRIVATE ${BZIP2_INCLUDE_DIRS})
+    target_link_libraries(ptscotch PRIVATE ${BZIP2_LIBRARIES})
+  endif()
+
+  if(LIBLZMA_FOUND)
+    target_compile_definitions(ptscotch PRIVATE COMMON_FILE_COMPRESS_LZMA)
+    target_include_directories(ptscotch PRIVATE ${LIBLZMA_INCLUDE_DIRS})
+    target_link_libraries(ptscotch PRIVATE ${LIBLZMA_LIBRARIES})
+  endif()
 
   if(APPLE)
     set_target_properties(ptscotch PROPERTIES LINK_FLAGS "-undefined dynamic_lookup")
   endif()
 
-  if(Threads_FOUND)
-    target_compile_definitions(ptscotch PRIVATE SCOTCH_PTHREAD COMMON_PTHREAD)
-    target_link_libraries(ptscotch PRIVATE Threads::Threads ${THREADS_PTHREADS_WIN32_LIBRARY})
+  if(USE_PTHREAD)
+    target_compile_definitions(ptscotch PUBLIC COMMON_PTHREAD SCOTCH_PTHREAD)
+    if(NOT WIN32)
+      target_link_libraries(ptscotch PUBLIC Threads::Threads)
+    else()
+      target_link_libraries(ptscotch PUBLIC PThreads4W::PThreads4W)
+    endif()
   endif()
 
   add_library(ptscotcherr library_error.c)
@@ -885,6 +925,7 @@ if(BUILD_PTSCOTCH)
   add_dependencies(ptscotcherrexit ptscotch_h scotch_h)
   if(NOT "${LIBPTSCOTCHERR}" STREQUAL "")
     target_link_libraries(ptscotch PUBLIC ${LIBPTSCOTCHERR})
+    add_dependencies(ptscotch ${LIBPTSCOTCHERR})
   endif()
 endif()
 
