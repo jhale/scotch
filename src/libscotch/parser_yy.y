@@ -64,6 +64,9 @@
 
 #include "module.h"
 #include "common.h"
+#ifdef _MSC_VER
+#define YY_NO_UNISTD_H
+#endif
 #include "parser.h"
 #include "parser_yy.h"
 #include "parser_ly.h"

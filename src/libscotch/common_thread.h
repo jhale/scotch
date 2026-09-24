@@ -82,6 +82,8 @@ struct ThreadContext_ {
     int                         dummval;          /*+ Dummy value if no affinity enabled  +*/
 #ifdef COMMON_PTHREAD_AFFINITY_LINUX
     cpu_set_t                   cpusdat;          /*+ Original thread mask of main thread +*/
+#else
+    void*                       dummy;
 #endif /* COMMON_PTHREAD_AFFINITY_LINUX */
   }                             savedat;          /*+ Save area for affinity mask         +*/
 #endif /* COMMON_PTHREAD */
