@@ -573,13 +573,9 @@ if(LIBLZMA_FOUND)
 endif()
 
 # Add thread library
-if(USE_PTHREAD)
-  target_compile_definitions(scotch PUBLIC COMMON_PTHREAD SCOTCH_PTHREAD)
-  if(NOT WIN32)
-    target_link_libraries(scotch PUBLIC Threads::Threads)
-  else()
-    target_link_libraries(scotch PUBLIC PThreads4W::PThreads4W)
-  endif()
+if(Threads_FOUND)
+  target_compile_definitions(scotch PRIVATE COMMON_PTHREAD SCOTCH_PTHREAD)
+  target_link_libraries(scotch PRIVATE Threads::Threads ${THREADS_PTHREADS_WIN32_LIBRARY})
 endif()
 
 # Include files
@@ -890,13 +886,9 @@ if(BUILD_PTSCOTCH)
     set_target_properties(ptscotch PROPERTIES LINK_FLAGS "-undefined dynamic_lookup")
   endif()
 
-  if(USE_PTHREAD)
-    target_compile_definitions(ptscotch PUBLIC COMMON_PTHREAD SCOTCH_PTHREAD)
-    if(NOT WIN32)
-      target_link_libraries(ptscotch PUBLIC Threads::Threads)
-    else()
-      target_link_libraries(ptscotch PUBLIC PThreads4W::PThreads4W)
-    endif()
+  if(Threads_FOUND)
+    target_compile_definitions(ptscotch PRIVATE SCOTCH_PTHREAD COMMON_PTHREAD)
+    target_link_libraries(ptscotch PRIVATE Threads::Threads ${THREADS_PTHREADS_WIN32_LIBRARY})
   endif()
 
   add_library(ptscotcherr library_error.c)
