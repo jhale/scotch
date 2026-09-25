@@ -830,15 +830,11 @@ set(PTSCOTCH_C_SOURCES
   vdgraph_store.c)
 
 if(BUILD_PTSCOTCH)
-  # ptscotch privately compiles its own copy of ${SCOTCH_C_SOURCES} rather
-  # than only linking against the scotch target. A handful of internal
-  # StratTab/Strat globals (e.g. stratdummy) are referenced directly (not
-  # just via function calls) across that boundary, and on Windows
-  # CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS cannot export data symbols for
-  # cross-DLL use. Compiling everything into ptscotch itself avoids the
-  # need for any such cross-DLL data reference.
+  # On Windows, compile ${SCOTCH_C_SOURCES} into ptscotch directly instead
+  # of linking against scotch, since MSVC can't cross-DLL export the data
+  # symbols (e.g. stratdummy) that PT-Scotch references directly.
   add_library(ptscotch
-    ${SCOTCH_C_SOURCES}
+    $<$<BOOL:${WIN32}>:${SCOTCH_C_SOURCES}>
     ${PTSCOTCH_C_SOURCES})
   add_library(SCOTCH::ptscotch ALIAS ptscotch)
 
@@ -855,26 +851,30 @@ if(BUILD_PTSCOTCH)
     $<BUILD_INTERFACE:${GENERATED_INCLUDE_DIR}>
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 
-  add_dependencies(ptscotch ptscotch_h scotch_h parser_yy_c parser_ll_c)
+  add_dependencies(ptscotch ptscotch_h scotch_h)
 
-  # Mirror the (de)compression library setup applied to scotch above,
-  # since ptscotch now compiles its own copy of the same sources.
-  if(ZLIB_FOUND)
-    target_compile_definitions(ptscotch PRIVATE COMMON_FILE_COMPRESS_GZ)
-    target_include_directories(ptscotch PRIVATE ${ZLIB_INCLUDE_DIRS})
-    target_link_libraries(ptscotch PRIVATE ${ZLIB_LIBRARIES})
-  endif()
+  if(WIN32)
+    add_dependencies(ptscotch parser_yy_c parser_ll_c)
 
-  if(BZIP2_FOUND)
-    target_compile_definitions(ptscotch PRIVATE COMMON_FILE_COMPRESS_BZ2)
-    target_include_directories(ptscotch PRIVATE ${BZIP2_INCLUDE_DIRS})
-    target_link_libraries(ptscotch PRIVATE ${BZIP2_LIBRARIES})
-  endif()
+    # Mirror the (de)compression library setup applied to scotch above,
+    # since ptscotch now compiles its own copy of the same sources.
+    if(ZLIB_FOUND)
+      target_compile_definitions(ptscotch PRIVATE COMMON_FILE_COMPRESS_GZ)
+      target_include_directories(ptscotch PRIVATE ${ZLIB_INCLUDE_DIRS})
+      target_link_libraries(ptscotch PRIVATE ${ZLIB_LIBRARIES})
+    endif()
 
-  if(LIBLZMA_FOUND)
-    target_compile_definitions(ptscotch PRIVATE COMMON_FILE_COMPRESS_LZMA)
-    target_include_directories(ptscotch PRIVATE ${LIBLZMA_INCLUDE_DIRS})
-    target_link_libraries(ptscotch PRIVATE ${LIBLZMA_LIBRARIES})
+    if(BZIP2_FOUND)
+      target_compile_definitions(ptscotch PRIVATE COMMON_FILE_COMPRESS_BZ2)
+      target_include_directories(ptscotch PRIVATE ${BZIP2_INCLUDE_DIRS})
+      target_link_libraries(ptscotch PRIVATE ${BZIP2_LIBRARIES})
+    endif()
+
+    if(LIBLZMA_FOUND)
+      target_compile_definitions(ptscotch PRIVATE COMMON_FILE_COMPRESS_LZMA)
+      target_include_directories(ptscotch PRIVATE ${LIBLZMA_INCLUDE_DIRS})
+      target_link_libraries(ptscotch PRIVATE ${LIBLZMA_LIBRARIES})
+    endif()
   endif()
 
   if(APPLE)

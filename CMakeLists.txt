@@ -119,6 +119,13 @@ option(USE_BZ2 "Use BZ2 compression format if found" ON)
 # Set fPIC flag when building shared libraries
 set(CMAKE_POSITION_INDEPENDENT_CODE ${BUILD_SHARED_LIBS})
 
+# Auto-export symbols from DLLs on Windows (no __declspec(dllexport) used).
+# Covers functions only, not data (e.g. StratTab/Strat globals like
+# stratdummy) -- see src/libscotch/CMakeLists.txt for that workaround.
+if(WIN32)
+  set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+endif()
+
 # scotcherr option
 set(LIBSCOTCHERR "" CACHE STRING "Which error library is linked by default")
 set(LIBPTSCOTCHERR "" CACHE STRING "Which parallel error library is linked by default")
