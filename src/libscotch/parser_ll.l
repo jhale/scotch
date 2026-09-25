@@ -96,6 +96,10 @@
 %option noyywrap
 %option reentrant
 
+/* To support build on Windows */
+%option nounistd
+
+
 IDENT                       [A-Za-z][0-9A-Za-z]*
 INTEGER                     [0-9]+
 FLOAT                       [0-9]+(\.[0-9]+)?([Ee][-+]?[0-9]+)?

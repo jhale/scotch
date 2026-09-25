@@ -70,7 +70,11 @@ static struct ContextValuesData_ {
 #else /* ((defined SCOTCH_DETERMINISTIC) || (defined COMMON_RANDOM_FIXED_SEED)) */
                               0
 #endif /* ((defined SCOTCH_DETERMINISTIC) || (defined COMMON_RANDOM_FIXED_SEED)) */
-  }, { -1.0 } };                                  /* Temporary hack: dummy value since ISO C does not accept zero-sized arrays */
+  }
+#ifndef _MSC_VER
+  , { }
+#endif
+  };
 
 /***********************************/
 /*                                 */
@@ -91,8 +95,8 @@ Context * const             contptr)
   int                 o;
 
   o = contextValuesInit (contptr, &contextvaluesdat, sizeof (contextvaluesdat),
-                         CONTEXTOPTIONNUMNBR, (byte *) &contextvaluesdat.vinttab - (byte *) &contextvaluesdat,
-                         CONTEXTOPTIONDBLNBR, (byte *) &contextvaluesdat.vdbltab - (byte *) &contextvaluesdat);
+                         CONTEXTOPTIONNUMNBR, (char *) &contextvaluesdat.vinttab - (char *) &contextvaluesdat,
+                         CONTEXTOPTIONDBLNBR, (char *) &contextvaluesdat.vdbltab - (char *) &contextvaluesdat);
 
   if (o == 0) {                                   /* If values array allocated, update it with existing environment variables */
     INT                 deteval;
