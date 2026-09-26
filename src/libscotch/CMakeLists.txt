@@ -553,23 +553,24 @@ else()
   message(STATUS "Determinism: none")
 endif()
 
-# Add (de)compression libraries
+# Add (de)compression libraries. Link the imported targets rather than
+# the raw *_LIBRARIES variables, so debug/release variants resolve
+# correctly for multi-config generators and consumers of the exported
+# static scotch target get a real, verified library path rather than a
+# guessed base name.
 if(ZLIB_FOUND)
   target_compile_definitions(scotch PRIVATE COMMON_FILE_COMPRESS_GZ)
-  target_include_directories(scotch PRIVATE ${ZLIB_INCLUDE_DIRS})
-  target_link_libraries(scotch PRIVATE ${ZLIB_LIBRARIES})
+  target_link_libraries(scotch PRIVATE ZLIB::ZLIB)
 endif()
 
 if(BZIP2_FOUND)
   target_compile_definitions(scotch PRIVATE COMMON_FILE_COMPRESS_BZ2)
-  target_include_directories(scotch PRIVATE ${BZIP2_INCLUDE_DIRS})
-  target_link_libraries(scotch PRIVATE ${BZIP2_LIBRARIES})
+  target_link_libraries(scotch PRIVATE BZip2::BZip2)
 endif()
 
 if(LIBLZMA_FOUND)
   target_compile_definitions(scotch PRIVATE COMMON_FILE_COMPRESS_LZMA)
-  target_include_directories(scotch PRIVATE ${LIBLZMA_INCLUDE_DIRS})
-  target_link_libraries(scotch PRIVATE ${LIBLZMA_LIBRARIES})
+  target_link_libraries(scotch PRIVATE LibLZMA::LibLZMA)
 endif()
 
 # Add thread library
