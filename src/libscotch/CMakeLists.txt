@@ -519,6 +519,12 @@ set_target_properties(scotch PROPERTIES VERSION ${SCOTCH_VERSION_LONG}
   SOVERSION ${SCOTCH_VERSION}.${SCOTCH_RELEASE})
 add_dependencies(scotch parser_yy_c parser_ll_c)
 
+if(WIN32)
+  # stratdummy is a data symbol shared with ptscotch across the DLL
+  # boundary, give it explicit dllexport linkage.
+  target_compile_definitions(scotch PRIVATE SCOTCH_STRAT_BUILD)
+endif()
+
 # scotcherr lib
 if(NOT "${LIBSCOTCHERR}" STREQUAL "")
   target_link_libraries(scotch PUBLIC ${LIBSCOTCHERR})
@@ -830,11 +836,7 @@ set(PTSCOTCH_C_SOURCES
   vdgraph_store.c)
 
 if(BUILD_PTSCOTCH)
-  # On Windows, compile ${SCOTCH_C_SOURCES} into ptscotch directly instead
-  # of linking against scotch, since MSVC can't cross-DLL export the data
-  # symbols (e.g. stratdummy) that PT-Scotch references directly.
   add_library(ptscotch
-    $<$<BOOL:${WIN32}>:${SCOTCH_C_SOURCES}>
     ${PTSCOTCH_C_SOURCES})
   add_library(SCOTCH::ptscotch ALIAS ptscotch)
 
@@ -852,30 +854,6 @@ if(BUILD_PTSCOTCH)
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 
   add_dependencies(ptscotch ptscotch_h scotch_h)
-
-  if(WIN32)
-    add_dependencies(ptscotch parser_yy_c parser_ll_c)
-
-    # Mirror the (de)compression library setup applied to scotch above,
-    # since ptscotch now compiles its own copy of the same sources.
-    if(ZLIB_FOUND)
-      target_compile_definitions(ptscotch PRIVATE COMMON_FILE_COMPRESS_GZ)
-      target_include_directories(ptscotch PRIVATE ${ZLIB_INCLUDE_DIRS})
-      target_link_libraries(ptscotch PRIVATE ${ZLIB_LIBRARIES})
-    endif()
-
-    if(BZIP2_FOUND)
-      target_compile_definitions(ptscotch PRIVATE COMMON_FILE_COMPRESS_BZ2)
-      target_include_directories(ptscotch PRIVATE ${BZIP2_INCLUDE_DIRS})
-      target_link_libraries(ptscotch PRIVATE ${BZIP2_LIBRARIES})
-    endif()
-
-    if(LIBLZMA_FOUND)
-      target_compile_definitions(ptscotch PRIVATE COMMON_FILE_COMPRESS_LZMA)
-      target_include_directories(ptscotch PRIVATE ${LIBLZMA_INCLUDE_DIRS})
-      target_link_libraries(ptscotch PRIVATE ${LIBLZMA_LIBRARIES})
-    endif()
-  endif()
 
   if(APPLE)
     set_target_properties(ptscotch PROPERTIES LINK_FLAGS "-undefined dynamic_lookup")
