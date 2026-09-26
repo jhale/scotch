@@ -378,8 +378,8 @@ FileCompress * const        compptr)
   encodat.avail_out = FILECOMPRESSDATASIZE;
   do {
     if ((encodat.avail_in == 0) && (enacval == LZMA_RUN)) {
-#ifdef _MSC_VER
-      int                 bytenbr; //According to MSDN _read only returns int
+#ifdef COMMON_OS_WINDOWS
+      int                 bytenbr;                /* _read () returns int on Windows */
 #else
       ssize_t             bytenbr;
 #endif

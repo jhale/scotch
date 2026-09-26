@@ -373,11 +373,7 @@ FileCompress * const        compptr)
   decodat.avail_out = FILECOMPRESSDATASIZE;
   do {
     if ((decodat.avail_in == 0) && (deacval == LZMA_RUN)) {
-#ifdef _MSC_VER
-      size_t              bytenbr; //According to MSDN fread returns size_t
-#else
-      ssize_t             bytenbr;
-#endif
+      size_t              bytenbr;                /* fread() returns size_t on all platforms */
 
       bytenbr = fread (compptr->bufftab, 1, FILECOMPRESSDATASIZE, compptr->oustptr); /* Read from pipe */
       if (ferror (compptr->oustptr)) {

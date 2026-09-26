@@ -70,11 +70,7 @@ static struct ContextValuesData_ {
 #else /* ((defined SCOTCH_DETERMINISTIC) || (defined COMMON_RANDOM_FIXED_SEED)) */
                               0
 #endif /* ((defined SCOTCH_DETERMINISTIC) || (defined COMMON_RANDOM_FIXED_SEED)) */
-  }
-#ifndef _MSC_VER
-  , { }
-#endif
-  };
+  }, { -1.0 } };                                  /* Temporary hack: dummy value since ISO C does not accept zero-sized arrays */
 
 /***********************************/
 /*                                 */
