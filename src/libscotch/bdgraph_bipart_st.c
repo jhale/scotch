@@ -78,20 +78,45 @@
 
 static Bdgraph              bdgraphdummy;     /* Dummy distributed bipartitioned graph for offset computations */
 
+#ifdef COMMON_OS_WINDOWS
+/* &stratdummy is not a link-time constant in ptscotch here, since
+** stratdummy is imported across the scotch/ptscotch DLL boundary.
+** These tables are therefore left zeroed at compile time and
+** patched once at run time instead. */
+static union {
+  BdgraphBipartBdParam      param;
+  StratNodeMethodData       padding;
+} bdgraphbipartstdefaultbd = { { 3 } };            /* stratbnd patched to &stratdummy below */
+
+static union {
+  BdgraphBipartMlParam      param;
+  StratNodeMethodData       padding;
+} bdgraphbipartstdefaultml = { { 5, 1000, 2, 10000, 0.8L } }; /* stratlow/stratasc/stratseq patched to &stratdummy below */
+
+static union {
+  BdgraphBipartSqParam      param;
+  StratNodeMethodData       padding;
+} bdgraphbipartstdefaultsq;                        /* strat patched to &stratdummy below */
+
+static int                  bdgraphbipartstpatched = 0;
+
+static
+void
+bdgraphBipartStPatch (void) {
+  if (bdgraphbipartstpatched == 0) {
+    bdgraphbipartstdefaultbd.param.stratbnd = &stratdummy;
+    bdgraphbipartstdefaultml.param.stratlow = &stratdummy;
+    bdgraphbipartstdefaultml.param.stratasc = &stratdummy;
+    bdgraphbipartstdefaultml.param.stratseq = &stratdummy;
+    bdgraphbipartstdefaultsq.param.strat    = &stratdummy;
+    bdgraphbipartstpatched = 1;
+  }
+}
+#else /* COMMON_OS_WINDOWS */
 static union {
   BdgraphBipartBdParam      param;
   StratNodeMethodData       padding;
 } bdgraphbipartstdefaultbd = { { 3, &stratdummy } };
-
-static union {
-  BdgraphBipartDfParam      param;
-  StratNodeMethodData       padding;
-} bdgraphbipartstdefaultdf = { { 500, 1.0, 0.0, BDGRAPHBIPARTDFTYPEBAL } };
-
-static union {
-  BdgraphBipartExParam      param;
-  StratNodeMethodData       padding;
-} bdgraphbipartstdefaultex = { { 5, 0.005 } };
 
 static union {
   BdgraphBipartMlParam      param;
@@ -102,6 +127,21 @@ static union {
   BdgraphBipartSqParam      param;
   StratNodeMethodData       padding;
 } bdgraphbipartstdefaultsq = { { &stratdummy } };
+
+static
+void
+bdgraphBipartStPatch (void) { }
+#endif /* COMMON_OS_WINDOWS */
+
+static union {
+  BdgraphBipartDfParam      param;
+  StratNodeMethodData       padding;
+} bdgraphbipartstdefaultdf = { { 500, 1.0, 0.0, BDGRAPHBIPARTDFTYPEBAL } };
+
+static union {
+  BdgraphBipartExParam      param;
+  StratNodeMethodData       padding;
+} bdgraphbipartstdefaultex = { { 5, 0.005 } };
 
 static StratMethodTab       bdgraphbipartstmethtab[] = { /* Bipartitioning methods array */
                               { BDGRAPHBIPARTSTMETHBD, "b",  (StratMethodFunc) bdgraphBipartBd, &bdgraphbipartstdefaultbd },
@@ -265,6 +305,8 @@ const Strat * restrict const  straptr)            /*+ Bipartitioning strategy   
 #ifdef SCOTCH_DEBUG_BDGRAPH2
   MPI_Comm            proccommold;                /*Save area for old communicator */
 #endif /* SCOTCH_DEBUG_BDGRAPH2 */
+
+  bdgraphBipartStPatch ();
 
 #ifdef SCOTCH_DEBUG_BDGRAPH2
   if (sizeof (Gnum) != sizeof (INT)) {

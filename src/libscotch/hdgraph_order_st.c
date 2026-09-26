@@ -75,6 +75,35 @@
 
 static Hdgraph              hdgraphorderstgraphdummy; /* Dummy graph for offset computations */
 
+#ifdef COMMON_OS_WINDOWS
+/* &stratdummy is not a link-time constant in ptscotch here, since
+** stratdummy is imported across the scotch/ptscotch DLL boundary.
+** These tables are therefore left zeroed at compile time and
+** patched once at run time instead. */
+static union {                                    /* Default parameters for nested dissection method */
+  HdgraphOrderNdParam       param;
+  StratNodeMethodData       padding;
+} hdgraphorderstdefaultnd;                         /* sepstrat/ordstratlea/ordstratsep patched to &stratdummy below */
+
+static union {                                    /* Default parameters for sequential method */
+  HdgraphOrderSqParam       param;
+  StratNodeMethodData       padding;
+} hdgraphorderstdefaultsq;                         /* ordstratseq patched to &stratdummy below */
+
+static int                  hdgraphorderstpatched = 0;
+
+static
+void
+hdgraphOrderStPatch (void) {
+  if (hdgraphorderstpatched == 0) {
+    hdgraphorderstdefaultnd.param.sepstrat    = &stratdummy;
+    hdgraphorderstdefaultnd.param.ordstratlea = &stratdummy;
+    hdgraphorderstdefaultnd.param.ordstratsep = &stratdummy;
+    hdgraphorderstdefaultsq.param.ordstratseq = &stratdummy;
+    hdgraphorderstpatched = 1;
+  }
+}
+#else /* COMMON_OS_WINDOWS */
 static union {                                    /* Default parameters for nested dissection method */
   HdgraphOrderNdParam       param;
   StratNodeMethodData       padding;
@@ -84,6 +113,11 @@ static union {                                    /* Default parameters for sequ
   HdgraphOrderSqParam       param;
   StratNodeMethodData       padding;
 } hdgraphorderstdefaultsq = { { &stratdummy } };
+
+static
+void
+hdgraphOrderStPatch (void) { }
+#endif /* COMMON_OS_WINDOWS */
 
 static StratMethodTab       hdgraphorderstmethtab[] = { /* Graph ordering methods array */
                               { HDGRAPHORDERSTMETHND, "n",  (StratMethodFunc) hdgraphOrderNd, &hdgraphorderstdefaultnd },
@@ -174,6 +208,8 @@ const Strat * restrict const  straptr)            /*+ Graph ordering strategy +*
 {
   StratTest           testdat;
   int                 o;
+
+  hdgraphOrderStPatch ();
 
   if (grafptr->s.vertglbnbr == 0)                 /* Return immediately if nothing to do */
     return (0);
