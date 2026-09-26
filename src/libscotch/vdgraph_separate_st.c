@@ -77,41 +77,6 @@
 
 static Vdgraph              vdgraphdummy;         /* Dummy distributed separator graph for offset computations */
 
-#ifdef COMMON_OS_WINDOWS
-/* &stratdummy is not a link-time constant in ptscotch here, since
-** stratdummy is imported across the scotch/ptscotch DLL boundary.
-** These tables are therefore left zeroed at compile time and
-** patched once at run time instead. */
-static union {
-  VdgraphSeparateBdParam    param;
-  StratNodeMethodData       padding;
-} vdgraphseparatedefaultbd = { { 3 } };             /* strat patched to &stratdummy below */
-
-static union {
-  VdgraphSeparateMlParam    param;
-  StratNodeMethodData       padding;
-} vdgraphseparatedefaultml = { { 5, 1000, 2, 10000, 0.8L } }; /* stratlow/stratasc/stratseq patched to &stratdummy below */
-
-static union {
-  VdgraphSeparateSqParam    param;
-  StratNodeMethodData       padding;
-} vdgraphseparatedefaultsq;                         /* strat patched to &stratdummy below */
-
-static int                  vdgraphseparatestpatched = 0;
-
-static
-void
-vdgraphSeparateStPatch (void) {
-  if (vdgraphseparatestpatched == 0) {
-    vdgraphseparatedefaultbd.param.strat    = &stratdummy;
-    vdgraphseparatedefaultml.param.stratlow = &stratdummy;
-    vdgraphseparatedefaultml.param.stratasc = &stratdummy;
-    vdgraphseparatedefaultml.param.stratseq = &stratdummy;
-    vdgraphseparatedefaultsq.param.strat    = &stratdummy;
-    vdgraphseparatestpatched = 1;
-  }
-}
-#else /* COMMON_OS_WINDOWS */
 static union {
   VdgraphSeparateBdParam    param;
   StratNodeMethodData       padding;
@@ -126,11 +91,6 @@ static union {
   VdgraphSeparateSqParam    param;
   StratNodeMethodData       padding;
 } vdgraphseparatedefaultsq = { { &stratdummy } };
-
-static
-void
-vdgraphSeparateStPatch (void) { }
-#endif /* COMMON_OS_WINDOWS */
 
 static union {
   VdgraphSeparateDfParam    param;
@@ -282,8 +242,6 @@ const Strat * restrict const  straptr)            /*+ Separation strategy       
 #ifdef SCOTCH_DEBUG_VDGRAPH2
   MPI_Comm            proccommold;                /* Save area for old communicator */
 #endif /* SCOTCH_DEBUG_VDGRAPH2 */
-
-  vdgraphSeparateStPatch ();
 
 #ifdef SCOTCH_DEBUG_VDGRAPH2
   if (sizeof (Gnum) != sizeof (INT)) {

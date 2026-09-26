@@ -72,37 +72,10 @@
 **  The static and global variables.
 */
 
-#ifdef COMMON_OS_WINDOWS
-/* &stratdummy is not a link-time constant in ptscotch here, since
-** stratdummy is imported across the scotch/ptscotch DLL boundary.
-** The table below is therefore left zeroed at compile time and
-** patched once at run time instead. */
-static union {
-  KdgraphMapRbParam         param;
-  StratNodeMethodData       padding;
-} kdgraphmapstdefaultrb = { { 0, 0, 0.05 } };       /* stratsep/stratseq patched to &stratdummy below */
-
-static int                  kdgraphmapstpatched = 0;
-
-static
-void
-kdgraphMapStPatch (void) {
-  if (kdgraphmapstpatched == 0) {
-    kdgraphmapstdefaultrb.param.stratsep = &stratdummy;
-    kdgraphmapstdefaultrb.param.stratseq = &stratdummy;
-    kdgraphmapstpatched = 1;
-  }
-}
-#else /* COMMON_OS_WINDOWS */
 static union {
   KdgraphMapRbParam         param;
   StratNodeMethodData       padding;
 } kdgraphmapstdefaultrb = { { &stratdummy, &stratdummy, 0.05 } };
-
-static
-void
-kdgraphMapStPatch (void) { }
-#endif /* COMMON_OS_WINDOWS */
 
 static StratMethodTab       kdgraphmapstmethtab[] = { /* Mapping methods array */
                               { KDGRAPHMAPSTMETHRB, "r",  (StratMethodFunc) kdgraphMapRb, &kdgraphmapstdefaultrb },
@@ -155,8 +128,6 @@ const Strat * restrict const  straptr)            /*+ Mapping strategy +*/
 {
   StratTest           testdat;
   int                 o;
-
-  kdgraphMapStPatch ();
 
 #ifdef SCOTCH_DEBUG_KDGRAPH2
   if (sizeof (Gnum) != sizeof (INT)) {

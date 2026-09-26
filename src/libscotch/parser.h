@@ -247,17 +247,7 @@ typedef struct ParserLocation_ {
 **  The external declarations.
 */
 
-#ifdef COMMON_OS_WINDOWS
-#ifdef SCOTCH_STRAT_BUILD                          /* Data symbols need explicit export/import decoration on Windows */
-#define SCOTCH_STRAT_LINKAGE        __declspec(dllexport)
-#else /* SCOTCH_STRAT_BUILD */
-#define SCOTCH_STRAT_LINKAGE        __declspec(dllimport)
-#endif /* SCOTCH_STRAT_BUILD */
-#else /* COMMON_OS_WINDOWS */
-#define SCOTCH_STRAT_LINKAGE
-#endif /* COMMON_OS_WINDOWS */
-
-extern SCOTCH_STRAT_LINKAGE Strat   stratdummy;           /*+ Dummy empty strategy node +*/
+extern Strat                stratdummy;           /*+ Dummy empty strategy node +*/
 
 /*
 **  The function prototypes.

@@ -519,12 +519,6 @@ set_target_properties(scotch PROPERTIES VERSION ${SCOTCH_VERSION_LONG}
   SOVERSION ${SCOTCH_VERSION}.${SCOTCH_RELEASE})
 add_dependencies(scotch parser_yy_c parser_ll_c)
 
-if(WIN32)
-  # stratdummy is a data symbol shared with ptscotch across the DLL
-  # boundary, give it explicit dllexport linkage.
-  target_compile_definitions(scotch PRIVATE SCOTCH_STRAT_BUILD)
-endif()
-
 # scotcherr lib
 if(NOT "${LIBSCOTCHERR}" STREQUAL "")
   target_link_libraries(scotch PUBLIC ${LIBSCOTCHERR})
