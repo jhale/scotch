@@ -91,8 +91,8 @@ Context * const             contptr)
   int                 o;
 
   o = contextValuesInit (contptr, &contextvaluesdat, sizeof (contextvaluesdat),
-                         CONTEXTOPTIONNUMNBR, (char *) &contextvaluesdat.vinttab - (char *) &contextvaluesdat,
-                         CONTEXTOPTIONDBLNBR, (char *) &contextvaluesdat.vdbltab - (char *) &contextvaluesdat);
+                         CONTEXTOPTIONNUMNBR, (byte *) &contextvaluesdat.vinttab - (byte *) &contextvaluesdat,
+                         CONTEXTOPTIONDBLNBR, (byte *) &contextvaluesdat.vdbltab - (byte *) &contextvaluesdat);
 
   if (o == 0) {                                   /* If values array allocated, update it with existing environment variables */
     INT                 deteval;

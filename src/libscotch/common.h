@@ -276,7 +276,9 @@
 
 #define INTVALMAX                   ((INT) (((UINT) 1 << (INTSIZEBITS - 1)) - 1))
 
+#ifndef byte
 #define byte unsigned char                        /* Byte type */
+#endif /* byte */
 #ifndef BYTE
 #define BYTE                        byte
 #endif /* BYTE */
