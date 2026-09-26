@@ -84,16 +84,6 @@ static union {
 } bdgraphbipartstdefaultbd = { { 3, &stratdummy } };
 
 static union {
-  BdgraphBipartMlParam      param;
-  StratNodeMethodData       padding;
-} bdgraphbipartstdefaultml = { { 5, 1000, 2, 10000, 0.8L, &stratdummy, &stratdummy, &stratdummy} };
-
-static union {
-  BdgraphBipartSqParam      param;
-  StratNodeMethodData       padding;
-} bdgraphbipartstdefaultsq = { { &stratdummy } };
-
-static union {
   BdgraphBipartDfParam      param;
   StratNodeMethodData       padding;
 } bdgraphbipartstdefaultdf = { { 500, 1.0, 0.0, BDGRAPHBIPARTDFTYPEBAL } };
@@ -102,6 +92,16 @@ static union {
   BdgraphBipartExParam      param;
   StratNodeMethodData       padding;
 } bdgraphbipartstdefaultex = { { 5, 0.005 } };
+
+static union {
+  BdgraphBipartMlParam      param;
+  StratNodeMethodData       padding;
+} bdgraphbipartstdefaultml = { { 5, 1000, 2, 10000, 0.8L, &stratdummy, &stratdummy, &stratdummy} };
+
+static union {
+  BdgraphBipartSqParam      param;
+  StratNodeMethodData       padding;
+} bdgraphbipartstdefaultsq = { { &stratdummy } };
 
 static StratMethodTab       bdgraphbipartstmethtab[] = { /* Bipartitioning methods array */
                               { BDGRAPHBIPARTSTMETHBD, "b",  (StratMethodFunc) bdgraphBipartBd, &bdgraphbipartstdefaultbd },

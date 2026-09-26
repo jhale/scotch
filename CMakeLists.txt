@@ -121,7 +121,8 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ${BUILD_SHARED_LIBS})
 
 # Auto-export symbols from DLLs on Windows (no __declspec(dllexport) used).
 # Covers functions only, not data (e.g. StratTab/Strat globals like
-# stratdummy) -- see src/libscotch/CMakeLists.txt for that workaround.
+# stratdummy); scotch/ptscotch are built as static libraries under
+# vcpkg, so no such data symbol currently crosses a DLL boundary.
 if(WIN32)
   set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 endif()

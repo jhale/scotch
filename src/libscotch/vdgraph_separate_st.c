@@ -83,6 +83,11 @@ static union {
 } vdgraphseparatedefaultbd = { { 3, &stratdummy } };
 
 static union {
+  VdgraphSeparateDfParam    param;
+  StratNodeMethodData       padding;
+} vdgraphseparatedefaultdf = { { 0, 300, 1.0, 0.0, 0.2 } };
+
+static union {
   VdgraphSeparateMlParam    param;
   StratNodeMethodData       padding;
 } vdgraphseparatedefaultml = { { 5, 1000, 2, 10000, 0.8L, &stratdummy, &stratdummy, &stratdummy } };
@@ -92,10 +97,6 @@ static union {
   StratNodeMethodData       padding;
 } vdgraphseparatedefaultsq = { { &stratdummy } };
 
-static union {
-  VdgraphSeparateDfParam    param;
-  StratNodeMethodData       padding;
-} vdgraphseparatedefaultdf = { { 0, 300, 1.0, 0.0, 0.2 } };
 
 static StratMethodTab       vdgraphseparatestmethtab[] = { /* Distributed graph separation methods array */
                              { VDGRAPHSEPASTMETHBD, "b",  (StratMethodFunc) vdgraphSeparateBd, &vdgraphseparatedefaultbd },
