@@ -119,10 +119,8 @@ option(USE_BZ2 "Use BZ2 compression format if found" ON)
 # Set fPIC flag when building shared libraries
 set(CMAKE_POSITION_INDEPENDENT_CODE ${BUILD_SHARED_LIBS})
 
-# Auto-export symbols from DLLs on Windows (no __declspec(dllexport) used).
-# Covers functions only, not data (e.g. StratTab/Strat globals like
-# stratdummy); scotch/ptscotch are built as static libraries under
-# vcpkg, so no such data symbol currently crosses a DLL boundary.
+# Auto-exports functions from DLLs on Windows without needing
+# __declspec(dllexport), but not data symbols like stratdummy.
 if(WIN32)
   set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 endif()

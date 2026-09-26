@@ -553,11 +553,8 @@ else()
   message(STATUS "Determinism: none")
 endif()
 
-# Add (de)compression libraries. Link the imported targets rather than
-# the raw *_LIBRARIES variables, so debug/release variants resolve
-# correctly for multi-config generators and consumers of the exported
-# static scotch target get a real, verified library path rather than a
-# guessed base name.
+# Link the imported targets, not the raw *_LIBRARIES variables, so the
+# exported static scotch target gets a real per-config library path.
 if(ZLIB_FOUND)
   target_compile_definitions(scotch PRIVATE COMMON_FILE_COMPRESS_GZ)
   target_link_libraries(scotch PRIVATE ZLIB::ZLIB)
